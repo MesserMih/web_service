@@ -26,3 +26,4 @@ tomli==2.0.1
 typing-inspect==0.7.1
 typing_extensions==4.1.1
 uvicorn==0.17.6
+psycopg2-binary==2.9.3
