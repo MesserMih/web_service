@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, MetaData
 
 engine = create_engine("postgresql://postgres:postgres@localhost/postgres", echo=True)
-                        # Где Messer0Mih - пароль от личной БД, а postgres - название БД
+                        # Где postgres - пароль от личной БД(2), а postgres - название БД(1)
 
 Base = declarative_base()
 
