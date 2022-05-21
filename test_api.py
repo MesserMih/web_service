@@ -11,7 +11,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 user_dict = users_db.get("greenatom")
 
 
-# Тест метода PUT при загрузке от 1 до 15 файлов (2 в частом случае)
+# Тест запроса PUT при загрузке от 1 до 15 файлов (2 в частом случае)
 def test_put_main_1ph():
     full_test_path = os.path.join('files_for_tests', 'test_ph.jpg')
     image = [('image', open(full_test_path, 'rb')), ('image', open(full_test_path, 'rb'))]
@@ -21,7 +21,7 @@ def test_put_main_1ph():
         headers={'Authorization': f'Bearer {user_dict["username"]}'}
     )
     print(response.headers)
-    assert not response.json()
+    assert response.status_code == 200
 
 
 # Тест метода PUT в случае, когда никакой файл не подаётся на вход метода
@@ -64,24 +64,19 @@ def test_put_main_1errph():
 
 # Тест метода GET
 def test_get_main():
-    content_get = []
     response = client.get("/frame/-1")
-    assert response.status_code == 200
-    assert response.json() == content_get
+    assert response.status_code == 422
 
 
 # Тест метода DELETE при удалении несуществующего кода запроса
 def test_delete_main():
 
-    response = client.delete("/frame/-1",
-                             headers={'Authorization': f'Bearer {user_dict["username"]}'})
-    assert response.status_code == 404
-    assert HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="resource not found")
+    response = client.delete("/frame/-1", headers={'Authorization': f'Bearer {user_dict["username"]}'})
+    assert response.status_code == 422
+    assert HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="resource not found")
 
 
 # Тест метода DELETE при удалении существующего кода запроса
 def test_delete_main5():
-    response = client.delete("/frame/1",
-                             headers={'Authorization': f'Bearer {user_dict["username"]}'})
+    response = client.delete("/frame/1", headers={'Authorization': f'Bearer {user_dict["username"]}'})
     assert response.status_code == 200
-    assert not response.json()
