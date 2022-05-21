@@ -2,3 +2,5 @@ venv/
 data/
 .idea/
 __pycache__/
+/bin
+test.db

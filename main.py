@@ -11,10 +11,21 @@ from database import SessionLocal
 from datetime import datetime
 from pathlib import Path
 import hashlib
+from sqlalchemy.orm import Session
+from database import Base, engine
+from model import Photo
 
 
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 class Photo(BaseModel):
@@ -103,7 +114,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     return {"access_token": user.username, "token_type": "bearer"}
 
 
-db = SessionLocal()
+# db = SessionLocal()
 
 
 def save_file(filename, data):
@@ -112,7 +123,7 @@ def save_file(filename, data):
 
 
 @app.put("/frame/")
-async def create_photo(image: List[UploadFile], current_user: User = Depends(get_current_active_user)):
+async def create_photo(image: List[UploadFile], db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
     """
     Метод PUT
 
@@ -128,7 +139,7 @@ async def create_photo(image: List[UploadFile], current_user: User = Depends(get
         code_count = max([out[elem].req_code for elem in range(0, len(out))])
     code_count += 1
     print(type(image[0]))
-    if len(image) == 0:
+    if not len(image):
         raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED, detail="no images")
 
     if len(image) > 15:
@@ -167,10 +178,11 @@ async def create_photo(image: List[UploadFile], current_user: User = Depends(get
         )
         db.add(new_photo)
         db.commit()
+    return {"status_code": 200, "message": "Successfully uploaded"}
 
 
 @app.get('/frame/{code_in}', response_model=List[Photo], status_code=status.HTTP_200_OK)
-async def read_photo(code_in: int):
+async def read_photo(code_in: int,  db: Session = Depends(get_db)):
     """
     Метод GET
 
@@ -181,7 +193,7 @@ async def read_photo(code_in: int):
 
 
 @app.delete('/frame/{code_in}', response_model=List[Photo], status_code=status.HTTP_200_OK)
-def delete_photo(code_in: int, current_user: User = Depends(get_current_active_user)):
+def delete_photo(code_in: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
     """
     Метод DELETE
 
@@ -202,6 +214,11 @@ def delete_photo(code_in: int, current_user: User = Depends(get_current_active_u
 
     db.commit()
 
+    return {"status_code": 200, "message": "Successfully deleted"}
+
 
 if __name__ == "__main__":
+    print("Creating database ....")
+
+    Base.metadata.create_all(engine)
     uvicorn.run("main:app", reload=True)
