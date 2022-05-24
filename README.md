@@ -25,10 +25,9 @@
 В файле **database.py** измените аргументы, 
 принимаемые функцией create_engine на свои персонализированные.
 
-`engine = create_engine("postgresql://postgres:Messer0Mih@localhost/postgre",
+`engine = create_engine("postgresql://postgres:postgres@localhost/postgre",
                        echo=True
-                       )  # Где Messer0Mih - пароль от личной БД, а postgre - название БД`
-
+                       )  # Где postgres в 1 случае - пользователь, во 2 - пароль
 #### *В файле model.py содержится класс со структурой создаваемой БД*
 
 ***
